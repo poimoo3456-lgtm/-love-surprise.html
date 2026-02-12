@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Surprise 💖</title>
+
+<style>
+body{
+    font-family:'Kanit',sans-serif;
+    background:linear-gradient(135deg,#ffc0cb,#ff8fcf);
+    margin:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    overflow:hidden;
+}
+.container{
+    background:white;
+    width:95%;
+    max-width:420px;
+    padding:20px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    text-align:center;
+    position:relative;
+    z-index:2;
+    max-height:90vh;
+    overflow-y:auto;
+}
+h2{color:#ff4da6;}
+input,textarea{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:10px;
+    border:1px solid #ffb6d9;
+}
+button{
+    padding:10px 15px;
+    margin:8px 5px;
+    border:none;
+    border-radius:10px;
+    background:#ff69b4;
+    color:white;
+    cursor:pointer;
+}
+button:hover{background:#ff1493;}
+.hidden{display:none;}
+img,video,iframe{
+    max-width:100%;
+    border-radius:12px;
+    margin-top:10px;
+}
+.preview-box{
+    background:#fff0f6;
+    padding:15px;
+    border-radius:15px;
+    margin-top:10px;
+}
+.small{font-size:12px;color:#777;}
+.heart{
+    position:absolute;
+    color:#ff69b4;
+    animation:float 6s linear infinite;
+}
+@keyframes float{
+    0%{transform:translateY(100vh) scale(1);}
+    100%{transform:translateY(-10vh) scale(1.5);opacity:0;}
+}
+</style>
+</head>
+<body>
+
+<!-- หน้า 1 -->
+<div class="container" id="formPage">
+    <h2>💖 สร้างความทรงจำ 💖</h2>
+
+    <input type="text" id="title" placeholder="เรื่องอะไร...">
+    <textarea id="story" rows="4" placeholder="เล่าเรื่องราวหวานๆ 💕"></textarea>
+
+    <h4>🖼 เพิ่มรูปภาพ</h4>
+    <input type="file" id="imageUpload" accept="image/*">
+
+    <h4>🎬 เพิ่มวิดีโอ (.mp4)</h4>
+    <input type="file" id="videoUpload" accept="video/mp4">
+
+    <h4>📺 หรือวางลิงก์ YouTube</h4>
+    <input type="text" id="youtubeLink" placeholder="https://www.youtube.com/watch?v=xxxx">
+
+    <label><input type="checkbox" id="usePassword"> ใส่รหัส 6 หลัก</label>
+    <input type="number" id="password" maxlength="6" placeholder="รหัส 6 หลัก" class="hidden">
+
+    <button onclick="nextPage()">ถัดไป</button>
+</div>
+
+<!-- หน้า 2 -->
+<div class="container hidden" id="successPage">
+    <h2>💖 บันทึกสำเร็จ! 💖</h2>
+    <p>ความทรงจำของคุณถูกบันทึกแล้ว 💕<br>
+    ชำระเงินเพื่อเปิดใช้งานและแชร์ให้คนพิเศษได้เลย</p>
+
+    <div class="preview-box">
+        <b>ธนาคาร:</b> กรุงไทย<br>
+        <b>เลขบัญชี:</b> 1220586870<br>
+        <b>ชื่อบัญชี:</b> นาย ณัฐวัตร ชูปรารมย์
+    </div>
+
+    <h4>📎 อัปโหลดสลิป</h4>
+    <input type="file" id="slipUpload" accept="image/*">
+
+    <button onclick="showPreview()">ดูตัวอย่าง</button>
+    <button onclick="generateLink()">สร้างลิงก์แชร์</button>
+
+    <div id="previewSection" class="hidden preview-box"></div>
+    <div id="shareLink" class="small"></div>
+</div>
+
+<!-- หน้าใส่รหัส -->
+<div class="container hidden" id="passwordPage">
+    <h2>🔐 ใส่รหัสเพื่อดูความทรงจำ</h2>
+    <input type="number" id="enterPassword" placeholder="รหัส 6 หลัก">
+    <button onclick="checkPassword()">เปิดดู</button>
+</div>
+
+<!-- หน้าแสดงผล -->
+<div class="container hidden" id="viewPage">
+</div>
+
+<script>
+let savedData={};
+
+document.getElementById("usePassword").addEventListener("change",function(){
+    document.getElementById("password").classList.toggle("hidden",!this.checked);
+});
+
+function nextPage(){
+    const title=document.getElementById("title").value;
+    const story=document.getElementById("story").value;
+    const password=document.getElementById("password").value;
+    const imageFile=document.getElementById("imageUpload").files[0];
+    const videoFile=document.getElementById("videoUpload").files[0];
+    const youtube=document.getElementById("youtubeLink").value;
+
+    if(!title||!story){alert("กรอกข้อมูลให้ครบ 💕");return;}
+    if(document.getElementById("usePassword").checked && password.length!==6){
+        alert("รหัสต้อง 6 หลัก 💖");return;
+    }
+
+    savedData={title,story,password};
+
+    if(imageFile){
+        const reader=new FileReader();
+        reader.onload=e=>savedData.image=e.target.result;
+        reader.readAsDataURL(imageFile);
+    }
+
+    if(videoFile){
+        const reader2=new FileReader();
+        reader2.onload=e=>savedData.video=e.target.result;
+        reader2.readAsDataURL(videoFile);
+    }
+
+    if(youtube){
+        const videoId=youtube.split("v=")[1]?.split("&")[0];
+        if(videoId){
+            savedData.youtube="https://www.youtube.com/embed/"+videoId;
+        }
+    }
+
+    document.getElementById("formPage").classList.add("hidden");
+    document.getElementById("successPage").classList.remove("hidden");
+}
+
+function showPreview(){
+    const preview=document.getElementById("previewSection");
+    preview.classList.remove("hidden");
+    preview.innerHTML=`
+        <h3>${savedData.title}</h3>
+        <p>${savedData.story}</p>
+        ${savedData.image?`<img src="${savedData.image}">`:""}
+        ${savedData.video?`<video controls src="${savedData.video}"></video>`:""}
+        ${savedData.youtube?`<iframe height="200" src="${savedData.youtube}" frameborder="0" allowfullscreen></iframe>`:""}
+        <p class="small">💖 ตัวอย่างก่อนเปิดใช้งาน</p>
+    `;
+}
+
+function generateLink(){
+    document.getElementById("shareLink").innerHTML=
+    "💌 แชร์ไฟล์นี้ให้คนพิเศษ แล้วให้เขาเปิดในเครื่องของเขา";
+    alert("สร้างลิงก์สำเร็จ 💕");
+
+    document.getElementById("successPage").classList.add("hidden");
+    if(savedData.password){
+        document.getElementById("passwordPage").classList.remove("hidden");
+    }else{
+        openMemory();
+    }
+}
+
+function checkPassword(){
+    if(document.getElementById("enterPassword").value===savedData.password){
+        openMemory();
+    }else{
+        alert("รหัสไม่ถูกต้อง 💔");
+    }
+}
+
+function openMemory(){
+    document.getElementById("passwordPage").classList.add("hidden");
+    const view=document.getElementById("viewPage");
+    view.classList.remove("hidden");
+    view.innerHTML=`
+        <h2>${savedData.title}</h2>
+        <p>${savedData.story}</p>
+        ${savedData.image?`<img src="${savedData.image}">`:""}
+        ${savedData.video?`<video controls src="${savedData.video}"></video>`:""}
+        ${savedData.youtube?`<iframe height="200" src="${savedData.youtube}" frameborder="0" allowfullscreen></iframe>`:""}
+    `;
+}
+
+/* หัวใจลอย */
+setInterval(()=>{
+    const heart=document.createElement("div");
+    heart.className="heart";
+    heart.style.left=Math.random()*100+"vw";
+    heart.innerHTML="💖";
+    heart.style.fontSize=(20+Math.random()*20)+"px";
+    document.body.appendChild(heart);
+    setTimeout(()=>heart.remove(),6000);
+},500);
+</script>
+
+</body>
+</html>
