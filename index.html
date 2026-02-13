@@ -3,159 +3,187 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Surprise Link 💖</title>
+<title>Love Surprise 💖</title>
+
 <style>
 body{
-    font-family: Arial;
-    background:#ffe6ec;
-    padding:20px;
+  font-family:sans-serif;
+  background:linear-gradient(135deg,#ffc0cb,#ff8fcf);
+  margin:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
 }
-.box{
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    max-width:500px;
-    margin:auto;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+.container{
+  background:white;
+  width:95%;
+  max-width:420px;
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
 }
+.hidden{display:none;}
 input,textarea{
-    width:100%;
-    padding:10px;
-    margin-top:8px;
-    border-radius:8px;
-    border:1px solid #ccc;
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:10px;
+  border:1px solid #ffb6d9;
 }
 button{
-    width:100%;
-    padding:12px;
-    margin-top:12px;
-    border:none;
-    border-radius:10px;
-    background:#ff4d6d;
-    color:white;
-    font-size:16px;
+  padding:10px 15px;
+  margin:8px 5px;
+  border:none;
+  border-radius:10px;
+  background:#ff69b4;
+  color:white;
+  cursor:pointer;
+  width:100%;
 }
-.hidden{
-    display:none;
+iframe{
+  width:100%;
+  height:200px;
+  border-radius:12px;
 }
-.success{
-    background:#d4edda;
-    padding:10px;
-    border-radius:8px;
-    margin-top:10px;
+.step{
+  font-weight:bold;
+  margin-bottom:10px;
+  color:#ff1493;
 }
 </style>
 </head>
 <body>
 
-<div class="box" id="createPage">
-<h2>สร้างเซอร์ไพรส์ 💖</h2>
-
-<input type="text" id="name" placeholder="ชื่อของเซอร์ไพรส์ (แฟนจะยังไม่เห็น)">
-<input type="number" id="price" placeholder="ราคา (จะไม่แสดงก่อนปลดล็อก)">
-<textarea id="detail" placeholder="ข้อความหรือรายละเอียด"></textarea>
-<input type="text" id="youtube" placeholder="ลิงก์ YouTube (ถ้ามี)">
-<input type="text" id="passcode" maxlength="6" placeholder="รหัส 6 ตัว (ไม่ใส่ก็ได้)">
-
-<button onclick="createLink()">สร้างลิงก์เซอร์ไพรส์</button>
-
-<div id="result"></div>
-</div>
-
-<div class="box hidden" id="viewPage">
-
-<h2>🎁 มีคนทำเซอร์ไพรส์ให้คุณ</h2>
-<p>กดปลดล็อกเพื่อดูข้างใน 💖</p>
-
-<div id="unlockArea"></div>
-
-<div id="realContent" class="hidden">
-<h3 id="v_name"></h3>
-<p id="v_price"></p>
-<p id="v_detail"></p>
-<div id="v_media"></div>
-</div>
-
-</div>
+<div class="container" id="app"></div>
 
 <script>
-function createLink(){
+const params=new URLSearchParams(window.location.search);
+const memoryData=params.get("data");
 
-let data = {
-    name: document.getElementById("name").value,
-    price: document.getElementById("price").value,
-    detail: document.getElementById("detail").value,
-    youtube: document.getElementById("youtube").value,
-    passcode: document.getElementById("passcode").value
-};
-
-if(data.passcode && data.passcode.length!=6){
-    alert("รหัสต้อง 6 ตัว");
-    return;
+if(memoryData){
+  loadView(JSON.parse(atob(memoryData)));
+}else{
+  loadCreate();
 }
 
-let encoded = btoa(JSON.stringify(data));
-let link = window.location.href.split("?")[0] + "?data=" + encoded;
+function loadCreate(){
+document.getElementById("app").innerHTML=`
 
-document.getElementById("result").innerHTML = `
-<div class="success">
-สร้างลิงก์แล้ว ✅<br><br>
-<input value="${link}" readonly onclick="this.select()">
-<br><br>
-ส่งลิงก์นี้ให้แฟนหลังโอนเงินได้เลย 💖
+<h2>💖 สร้างความทรงจำ 💖</h2>
+
+<div id="step1">
+<div class="step">ขั้นตอนที่ 1/3</div>
+<input type="text" id="title" placeholder="ชื่อเรื่อง">
+<textarea id="story" placeholder="เรื่องราว"></textarea>
+<input type="text" id="youtube" placeholder="ลิงก์ YouTube (ถ้ามี)">
+<button onclick="nextStep(2)">ถัดไป ➜</button>
+</div>
+
+<div id="step2" class="hidden">
+<div class="step">ขั้นตอนที่ 2/3</div>
+<label>
+<input type="checkbox" id="usePassword"> ตั้งรหัส 6 หลัก
+</label>
+<input type="number" id="password" placeholder="รหัส 6 หลัก" style="display:none;">
+<button onclick="nextStep(3)">ถัดไป ➜</button>
+<button onclick="nextStep(1)">⬅ ย้อนกลับ</button>
+</div>
+
+<div id="step3" class="hidden">
+<div class="step">ขั้นตอนที่ 3/3</div>
+
+<h3>💳 ชำระเงิน 59 บาท</h3>
+<img src="qr.png" style="width:100%;border-radius:15px;">
+
+<p><b>ชื่อบัญชี:</b> ณัฐวัตร ชูปรารมย์</p>
+
+<br>
+<button onclick="createLink()">ยืนยันและสร้างลิงก์</button>
+
+<p id="result"></p>
 </div>
 `;
+
+document.getElementById("usePassword").addEventListener("change",function(){
+  document.getElementById("password").style.display=this.checked?"block":"none";
+});
 }
 
-function loadItem(){
+function nextStep(step){
+document.querySelectorAll("#step1,#step2,#step3")
+.forEach(el=>el.classList.add("hidden"));
+document.getElementById("step"+step).classList.remove("hidden");
+}
 
-let params = new URLSearchParams(window.location.search);
-let data = params.get("data");
+function createLink(){
+const title=document.getElementById("title").value;
+const story=document.getElementById("story").value;
+const youtube=document.getElementById("youtube").value;
+const usePass=document.getElementById("usePassword").checked;
+const password=document.getElementById("password").value;
 
-if(!data) return;
+if(!title || !story){
+  alert("กรอกข้อมูลให้ครบ");
+  return;
+}
 
-document.getElementById("createPage").classList.add("hidden");
-document.getElementById("viewPage").classList.remove("hidden");
+if(usePass && !/^[0-9]{6}$/.test(password)){
+  alert("รหัสต้องเป็นตัวเลข 6 หลัก");
+  return;
+}
 
-let item = JSON.parse(atob(data));
+const data={
+  title,
+  story,
+  youtube,
+  password:usePass?password:null
+};
 
-if(item.passcode){
-document.getElementById("unlockArea").innerHTML = `
-<input type="text" id="enterPass" placeholder="ใส่รหัส 6 ตัว">
-<button onclick="checkPass('${item.passcode}', ${JSON.stringify(item)})">ปลดล็อก</button>
+const link=window.location.href.split("?")[0]
++"?data="+btoa(JSON.stringify(data));
+
+document.getElementById("result").innerHTML=
+"✅ ลิงก์ของคุณ:<br><input value='"+link+"' readonly onclick='this.select()'>";
+}
+
+function loadView(data){
+
+if(data.password){
+document.getElementById("app").innerHTML=`
+<h3>🔐 ใส่รหัส 6 หลัก</h3>
+<input type="number" id="pass">
+<button onclick="checkPass('${data.password}','${btoa(JSON.stringify(data))}')">เปิดดู</button>
+<p id="wrong" style="color:red;"></p>
 `;
 }else{
-showContent(item);
+showMemory(data);
 }
 }
 
-function checkPass(realPass, item){
-let input = document.getElementById("enterPass").value;
-if(input===realPass){
-showContent(item);
+function checkPass(real,encoded){
+const input=document.getElementById("pass").value;
+if(input===real){
+  showMemory(JSON.parse(atob(encoded)));
 }else{
-alert("รหัสไม่ถูกต้อง");
+  document.getElementById("wrong").innerText="รหัสไม่ถูกต้อง";
 }
 }
 
-function showContent(item){
-
-document.getElementById("realContent").classList.remove("hidden");
-
-document.getElementById("v_name").innerText = "💖 " + item.name;
-document.getElementById("v_price").innerText = "ราคา: " + item.price + " บาท";
-document.getElementById("v_detail").innerText = item.detail;
-
-if(item.youtube){
-let embed = item.youtube.replace("watch?v=","embed/");
-document.getElementById("v_media").innerHTML =
-`<iframe width="100%" height="250" src="${embed}" frameborder="0" allowfullscreen></iframe>`;
+function getVideoId(url){
+return url?.split("v=")[1]?.split("&")[0];
 }
 
-document.getElementById("unlockArea").innerHTML="";
+function showMemory(data){
+document.getElementById("app").innerHTML=`
+<h2>${data.title}</h2>
+<p>${data.story}</p>
+${data.youtube?`
+<iframe src="https://www.youtube.com/embed/${getVideoId(data.youtube)}"
+frameborder="0" allowfullscreen></iframe>`:""}
+<p style="color:#ff1493;">💖 เปิดดูสำเร็จ</p>
+`;
 }
-
-loadItem();
 </script>
 
 </body>
