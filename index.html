@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบขายของส่วนตัว</title>
+<title>Surprise Link 💖</title>
 <style>
 body{
     font-family: Arial;
-    background:#f4f4f4;
+    background:#ffe6ec;
     padding:20px;
 }
 .box{
@@ -35,13 +35,8 @@ button{
     color:white;
     font-size:16px;
 }
-.media{
-    margin-top:10px;
-}
-img,video,iframe{
-    width:100%;
-    border-radius:10px;
-    margin-top:10px;
+.hidden{
+    display:none;
 }
 .success{
     background:#d4edda;
@@ -54,57 +49,50 @@ img,video,iframe{
 <body>
 
 <div class="box" id="createPage">
-<h2>สร้างรายการขาย</h2>
+<h2>สร้างเซอร์ไพรส์ 💖</h2>
 
-<input type="text" id="name" placeholder="ชื่อสินค้า">
-
-<input type="number" id="price" placeholder="ราคา (บาท)">
-
-<textarea id="detail" placeholder="รายละเอียด"></textarea>
-
-<input type="file" id="imageUpload" accept="image/*,video/*">
-
+<input type="text" id="name" placeholder="ชื่อของเซอร์ไพรส์ (แฟนจะยังไม่เห็น)">
+<input type="number" id="price" placeholder="ราคา (จะไม่แสดงก่อนปลดล็อก)">
+<textarea id="detail" placeholder="ข้อความหรือรายละเอียด"></textarea>
 <input type="text" id="youtube" placeholder="ลิงก์ YouTube (ถ้ามี)">
-
 <input type="text" id="passcode" maxlength="6" placeholder="รหัส 6 ตัว (ไม่ใส่ก็ได้)">
 
-<button onclick="createLink()">สร้างลิงก์</button>
+<button onclick="createLink()">สร้างลิงก์เซอร์ไพรส์</button>
 
 <div id="result"></div>
-
 </div>
 
-<div class="box" id="viewPage" style="display:none;">
-<h2 id="v_name"></h2>
+<div class="box hidden" id="viewPage">
+
+<h2>🎁 มีคนทำเซอร์ไพรส์ให้คุณ</h2>
+<p>กดปลดล็อกเพื่อดูข้างใน 💖</p>
+
+<div id="unlockArea"></div>
+
+<div id="realContent" class="hidden">
+<h3 id="v_name"></h3>
 <p id="v_price"></p>
 <p id="v_detail"></p>
 <div id="v_media"></div>
-
-<div id="unlockArea"></div>
+</div>
 
 </div>
 
 <script>
 function createLink(){
 
-let name = document.getElementById("name").value;
-let price = document.getElementById("price").value;
-let detail = document.getElementById("detail").value;
-let youtube = document.getElementById("youtube").value;
-let passcode = document.getElementById("passcode").value;
+let data = {
+    name: document.getElementById("name").value,
+    price: document.getElementById("price").value,
+    detail: document.getElementById("detail").value,
+    youtube: document.getElementById("youtube").value,
+    passcode: document.getElementById("passcode").value
+};
 
-if(passcode && passcode.length!=6){
+if(data.passcode && data.passcode.length!=6){
     alert("รหัสต้อง 6 ตัว");
     return;
 }
-
-let data = {
-    name:name,
-    price:price,
-    detail:detail,
-    youtube:youtube,
-    passcode:passcode
-};
 
 let encoded = btoa(JSON.stringify(data));
 let link = window.location.href.split("?")[0] + "?data=" + encoded;
@@ -114,7 +102,7 @@ document.getElementById("result").innerHTML = `
 สร้างลิงก์แล้ว ✅<br><br>
 <input value="${link}" readonly onclick="this.select()">
 <br><br>
-หลังโอนเงินเสร็จ ส่งลิงก์นี้ให้แฟนได้เลย 💖
+ส่งลิงก์นี้ให้แฟนหลังโอนเงินได้เลย 💖
 </div>
 `;
 }
@@ -126,37 +114,45 @@ let data = params.get("data");
 
 if(!data) return;
 
-document.getElementById("createPage").style.display="none";
-document.getElementById("viewPage").style.display="block";
+document.getElementById("createPage").classList.add("hidden");
+document.getElementById("viewPage").classList.remove("hidden");
 
 let item = JSON.parse(atob(data));
 
-document.getElementById("v_name").innerText = item.name;
-document.getElementById("v_price").innerText = "ราคา: "+item.price+" บาท";
-document.getElementById("v_detail").innerText = item.detail;
-
-let mediaDiv = document.getElementById("v_media");
-
-if(item.youtube){
-let embed = item.youtube.replace("watch?v=","embed/");
-mediaDiv.innerHTML += `<iframe height="250" src="${embed}" frameborder="0" allowfullscreen></iframe>`;
-}
-
 if(item.passcode){
 document.getElementById("unlockArea").innerHTML = `
-<input type="text" id="enterPass" placeholder="ใส่รหัสเพื่อปลดล็อก">
-<button onclick="checkPass('${item.passcode}')">ปลดล็อก</button>
+<input type="text" id="enterPass" placeholder="ใส่รหัส 6 ตัว">
+<button onclick="checkPass('${item.passcode}', ${JSON.stringify(item)})">ปลดล็อก</button>
 `;
+}else{
+showContent(item);
 }
 }
 
-function checkPass(realPass){
+function checkPass(realPass, item){
 let input = document.getElementById("enterPass").value;
 if(input===realPass){
-alert("ปลดล็อกสำเร็จ ❤️");
+showContent(item);
 }else{
 alert("รหัสไม่ถูกต้อง");
 }
+}
+
+function showContent(item){
+
+document.getElementById("realContent").classList.remove("hidden");
+
+document.getElementById("v_name").innerText = "💖 " + item.name;
+document.getElementById("v_price").innerText = "ราคา: " + item.price + " บาท";
+document.getElementById("v_detail").innerText = item.detail;
+
+if(item.youtube){
+let embed = item.youtube.replace("watch?v=","embed/");
+document.getElementById("v_media").innerHTML =
+`<iframe width="100%" height="250" src="${embed}" frameborder="0" allowfullscreen></iframe>`;
+}
+
+document.getElementById("unlockArea").innerHTML="";
 }
 
 loadItem();
