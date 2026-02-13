@@ -2,8 +2,9 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Love Surprise 💖</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Surprise 💖</title>
+
 <style>
 body{
   font-family:sans-serif;
@@ -37,17 +38,20 @@ button{
   font-size:16px;
   cursor:pointer;
 }
-button:hover{opacity:0.9}
 .hidden{display:none}
-.qr{
-  width:100%;
-  border-radius:15px;
+.qr{width:100%;border-radius:15px;}
+.linkBox{
+  background:#f3f3f3;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+  word-break:break-all;
 }
-.center{text-align:center}
 </style>
 </head>
 <body>
 
+<!-- STEP 1 -->
 <div class="container" id="step1">
 <h2>สร้างเซอร์ไพรส์ให้แฟน 💕</h2>
 
@@ -65,28 +69,17 @@ button:hover{opacity:0.9}
 </div>
 
 
+<!-- STEP 2 -->
 <div class="container hidden" id="step2">
 <h2>ขั้นตอนที่ 2/2</h2>
 
-<div class="center" style="background:#f8f8f8;padding:15px;border-radius:15px;">
-
-<p style="font-size:18px"><b>ชำระเงิน 59 บาท</b></p>
-
-<img class="qr"
-src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Krungthai-1220586870-59">
-
-<hr>
+<p><b>ชำระเงิน 59 บาท</b></p>
 
 <p><b>ธนาคาร:</b> กรุงไทย</p>
-<p><b>เลขบัญชี:</b> <span id="accNum">1220586870</span></p>
+<p><b>เลขบัญชี:</b> 1220586870</p>
 <p><b>ชื่อบัญชี:</b> ณัฐวัตร ชูปรารมย์</p>
 
-<button onclick="copyAcc()">คัดลอกเลขบัญชี</button>
-
-</div>
-
-<br>
-<button onclick="createLink()">ยืนยันและสร้างลิงก์</button>
+<button onclick="createLink()">ยืนยันและสร้างลิงก์ 💖</button>
 
 <div id="result"></div>
 </div>
@@ -94,7 +87,7 @@ src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=Krungthai-122
 
 <script>
 
-// ===== ขั้นตอน 1 =====
+// STEP 1
 function goPay(){
 let title=document.getElementById("title").value.trim();
 let story=document.getElementById("story").value.trim();
@@ -116,67 +109,38 @@ document.getElementById("step2").classList.remove("hidden");
 }
 
 
-// ===== COPY แบบรองรับทุกเครื่อง =====
-function copyAcc(){
-let text=document.getElementById("accNum").innerText;
-
-// วิธีใหม่
-if(navigator.clipboard){
-navigator.clipboard.writeText(text).then(()=>{
-alert("คัดลอกแล้ว: "+text);
-}).catch(()=>{
-fallbackCopy(text);
-});
-}else{
-fallbackCopy(text);
-}
-}
-
-// วิธีสำรอง iPhone
-function fallbackCopy(text){
-let temp=document.createElement("textarea");
-temp.value=text;
-document.body.appendChild(temp);
-temp.select();
-document.execCommand("copy");
-document.body.removeChild(temp);
-alert("คัดลอกแล้ว: "+text);
-}
-
-
-// ===== สร้างลิงก์ =====
+// สร้างลิงก์
 function createLink(){
 
-let title=document.getElementById("title").value;
-let story=document.getElementById("story").value;
-let youtube=document.getElementById("youtube").value;
-let usePass=document.getElementById("usePass").checked;
-let password=document.getElementById("password").value;
-
 let data={
-title:title,
-story:story,
-youtube:youtube,
-password:usePass?password:null
+title:document.getElementById("title").value,
+story:document.getElementById("story").value,
+youtube:document.getElementById("youtube").value,
+password:document.getElementById("usePass").checked ?
+document.getElementById("password").value : null
 };
 
-let link=window.location.origin+
-window.location.pathname+
-"?data="+btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+// เข้ารหัสรองรับภาษาไทย
+let encoded=btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+
+let base=window.location.origin + window.location.pathname;
+let link=base + "?data=" + encoded;
 
 document.getElementById("result").innerHTML=
-"<br><b>ลิงก์ของคุณ:</b><br><input value='"+link+"' onclick='this.select()'>";
+`<div class="linkBox">
+<b>ลิงก์ของคุณ:</b><br>
+<input value="${link}" onclick="this.select()">
+</div>`;
 
-alert("สร้างลิงก์สำเร็จ 💖");
 }
 
 
-/* ====== หน้าเปิดลิงก์ ====== */
-
+// ===== หน้าเปิดลิงก์ =====
 const params=new URLSearchParams(window.location.search);
 const memory=params.get("data");
 
 if(memory){
+
 let data=JSON.parse(decodeURIComponent(escape(atob(memory))));
 
 if(data.password){
