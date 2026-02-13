@@ -14,7 +14,6 @@ body{
     justify-content:center;
     align-items:center;
     height:100vh;
-    overflow:hidden;
 }
 .container{
     background:white;
@@ -24,8 +23,6 @@ body{
     border-radius:20px;
     box-shadow:0 10px 30px rgba(0,0,0,0.2);
     text-align:center;
-    position:relative;
-    z-index:2;
     max-height:90vh;
     overflow-y:auto;
 }
@@ -52,31 +49,35 @@ input,textarea{
     border-radius:15px;
     margin-top:10px;
 }
-img,video,iframe{
-    max-width:100%;
+iframe{
+    width:100%;
+    height:200px;
     border-radius:12px;
-    margin-top:10px;
+}
+.price{
+    font-size:20px;
+    font-weight:bold;
+    color:#ff1493;
 }
 </style>
 </head>
 <body>
 
+<!-- หน้า 1 สร้าง -->
 <div class="container" id="formPage">
 <h2>💖 สร้างความทรงจำ 💖</h2>
 
-<input type="text" id="title" placeholder="เรื่องอะไร...">
-<textarea id="story" rows="4" placeholder="เล่าเรื่องราวหวานๆ 💕"></textarea>
+<input type="text" id="title" placeholder="ชื่อเรื่อง">
+<textarea id="story" rows="4" placeholder="เล่าเรื่องราว"></textarea>
+<input type="text" id="youtube" placeholder="ลิงก์ YouTube">
 
-<input type="file" id="imageUpload" accept="image/*">
-<input type="file" id="videoUpload" accept="video/mp4">
-<input type="text" id="youtubeLink" placeholder="ลิงก์ YouTube">
+<button onclick="showPreview()">ดูตัวอย่าง</button>
+<button onclick="goPayment()">ไปหน้าชำระเงิน</button>
 
-<label><input type="checkbox" id="usePassword"> ใส่รหัส 6 หลัก</label>
-<input type="number" id="password" maxlength="6" class="hidden">
-
-<button onclick="nextPage()">ถัดไป</button>
+<div id="previewSection" class="hidden preview-box"></div>
 </div>
 
+<!-- หน้า 2 ชำระเงิน -->
 <div class="container hidden" id="paymentPage">
 <h2>💳 ชำระเงินเพื่อปลดล็อก</h2>
 
@@ -86,48 +87,56 @@ img,video,iframe{
 ชื่อบัญชี: <b id="accountName">นาย ณัฐวัตร ชูปรารมย์</b>
 </div>
 
+<p class="price">ค่าปลดล็อก: 59 บาท</p>
+
 <input type="file" id="slipUpload" accept="image/*">
 <button onclick="verifySlip()">🔍 AI ตรวจสอบสลิป</button>
 
 <p id="verifyResult"></p>
 </div>
 
+<!-- หน้าแสดงผล -->
 <div class="container hidden" id="viewPage"></div>
 
 <script>
 let savedData={};
 
-document.getElementById("usePassword").addEventListener("change",function(){
-    document.getElementById("password").classList.toggle("hidden",!this.checked);
-});
+function getVideoId(url){
+    return url.split("v=")[1]?.split("&")[0];
+}
 
-function nextPage(){
+function showPreview(){
     savedData.title=document.getElementById("title").value;
     savedData.story=document.getElementById("story").value;
-    savedData.password=document.getElementById("password").value;
+    savedData.youtube=document.getElementById("youtube").value;
 
-    const youtube=document.getElementById("youtubeLink").value;
-    if(youtube){
-        const videoId=youtube.split("v=")[1]?.split("&")[0];
-        if(videoId){
-            savedData.youtube="https://www.youtube.com/embed/"+videoId;
-        }
-    }
+    const preview=document.getElementById("previewSection");
+    preview.classList.remove("hidden");
 
+    preview.innerHTML=`
+        <h3>${savedData.title}</h3>
+        <p>${savedData.story.substring(0,80)}...</p>
+        ${savedData.youtube?`
+        <iframe src="https://www.youtube.com/embed/${getVideoId(savedData.youtube)}"
+        frameborder="0" allowfullscreen></iframe>`:""}
+        <p style="color:#ff69b4;">💖 ตัวอย่างฟรี</p>
+    `;
+}
+
+function goPayment(){
     document.getElementById("formPage").classList.add("hidden");
     document.getElementById("paymentPage").classList.remove("hidden");
 }
 
 async function verifySlip(){
     const file=document.getElementById("slipUpload").files[0];
-    if(!file){alert("อัปโหลดสลิปก่อน 💕");return;}
+    if(!file){alert("อัปโหลดสลิปก่อน");return;}
 
     const reader=new FileReader();
     reader.onload=async function(e){
-
         const base64=e.target.result.split(",")[1];
 
-        const response=await fetch("https://vision.googleapis.com/v1/images:annotate?key=YOUR_API_KEY",{
+        const res=await fetch("https://vision.googleapis.com/v1/images:annotate?key=YOUR_API_KEY",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify({
@@ -138,16 +147,15 @@ async function verifySlip(){
             })
         });
 
-        const data=await response.json();
+        const data=await res.json();
         const text=data.responses[0].fullTextAnnotation?.text || "";
-
         const accountName=document.getElementById("accountName").innerText;
 
         if(text.includes(accountName)){
-            document.getElementById("verifyResult").innerHTML="✅ ชื่อถูกต้อง ปลดล็อกแล้ว 💖";
+            document.getElementById("verifyResult").innerHTML="✅ ชื่อถูกต้อง ปลดล็อกแล้ว";
             openMemory();
         }else{
-            document.getElementById("verifyResult").innerHTML="❌ ชื่อไม่ตรง ตรวจสอบใหม่";
+            document.getElementById("verifyResult").innerHTML="❌ ชื่อไม่ตรง";
         }
     };
     reader.readAsDataURL(file);
@@ -159,9 +167,12 @@ function openMemory(){
     view.classList.remove("hidden");
 
     view.innerHTML=`
-    <h2>${savedData.title}</h2>
-    <p>${savedData.story}</p>
-    ${savedData.youtube?`<iframe height="200" src="${savedData.youtube}" frameborder="0" allowfullscreen></iframe>`:""}
+        <h2>${savedData.title}</h2>
+        <p>${savedData.story}</p>
+        ${savedData.youtube?`
+        <iframe src="https://www.youtube.com/embed/${getVideoId(savedData.youtube)}"
+        frameborder="0" allowfullscreen></iframe>`:""}
+        <p style="color:#ff1493;">💖 ปลดล็อกสำเร็จ</p>
     `;
 }
 </script>
